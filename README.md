@@ -1,27 +1,12 @@
-# Raw data files
-data/raw/
-*.csv
+# 🔄 Customer Churn Prediction
 
-# Python cache
-__pycache__/
-*.py[cod]
-*.pyo
+## Status: In Progress 🚧
 
-# Jupyter checkpoints
-.ipynb_checkpoints/
-*/.ipynb_checkpoints/*
+A machine learning project to predict customer churn
+using Logistic Regression and Random Forest.
+Built with Python and deployed as a Streamlit web app.
 
-# Virtual environment
-venv/
-env/
-.env
-
-# VS Code settings
-.vscode/
-
-# Windows files
-Thumbs.db
-Desktop.ini
-
-# Streamlit
-.streamlit/secrets.toml
+## Tools
+- Python, Pandas, Scikit-learn
+- Streamlit
+- Git & GitHub
