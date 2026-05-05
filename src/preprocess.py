@@ -111,7 +111,7 @@ def encode_features(df):
         New customer data must match these columns exactly!
     """
 
-    categorical_cols = df.select_dtypes(include='object').columns.tolist()
+    categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
 
     print(f"   Found {len(categorical_cols)} "
           f"text columns to encode")
