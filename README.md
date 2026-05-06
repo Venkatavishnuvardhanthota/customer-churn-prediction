@@ -77,7 +77,7 @@ cancels their subscription. The goal is to:
 
 ## 📁 Project Structure
 
-\`\`\`
+```
 customer-churn-prediction/
 │
 ├── data/
@@ -115,7 +115,7 @@ customer-churn-prediction/
 │
 ├── requirements.txt
 └── README.md
-\`\`\`
+```
 
 ---
 
