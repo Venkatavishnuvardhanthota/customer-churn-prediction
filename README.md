@@ -183,7 +183,10 @@ Streamlit App (anyone can predict!)
 
 ## 🌐 Live Demo
 
-[Coming soon - Streamlit Cloud deployment]
+🚀 **[Click here to try the app!](https://customer-churn-prediction-0001.streamlit.app/)**
+
+Enter any customer details and instantly see
+the churn prediction with probability score!
 
 ---
 
