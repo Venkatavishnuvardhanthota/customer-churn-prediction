@@ -1,5 +1,9 @@
+import os
 import pandas as pd
 import numpy as np
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROCESSED_DIR = os.path.join(PROJECT_ROOT, 'data', 'processed')
 
 
 def load_data(filepath):
@@ -73,7 +77,7 @@ def clean_data(df):
 
     df['Churn'] = df['Churn'].map({'Yes': 1, 'No': 0})
 
-    print(f"Churn encoded: Yes→1, No→0")
+    print(f"Churn encoded: Yes->1, No->0")
     print(f"Cleaning done: {df.shape[0]} rows, "
           f"{df.shape[1]} columns")
 
@@ -111,7 +115,7 @@ def encode_features(df):
         New customer data must match these columns exactly!
     """
 
-    categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
+    categorical_cols = df.select_dtypes(include=['object', 'category', 'str']).columns.tolist()
 
     print(f"   Found {len(categorical_cols)} "
           f"text columns to encode")
@@ -183,9 +187,10 @@ def run_preprocessing_pipeline(filepath):
     df_encoded, feature_columns = encode_features(df_clean)
 
     print("\n STEP 4: Saving processed data...")
-    output_path = '../data/processed/telco_churn_cleaned.csv'
-    df_encoded.to_csv(output_path, index=False)
-    print(f"Saved to: {output_path}")
+    os.makedirs(PROCESSED_DIR, exist_ok=True)
+    df_clean.to_csv(os.path.join(PROCESSED_DIR, 'telco_churn_clean.csv'), index=False)
+    df_encoded.to_csv(os.path.join(PROCESSED_DIR, 'telco_churn_encoded.csv'), index=False)
+    print(f"Saved to: {PROCESSED_DIR}")
 
     print("\n" + "=" * 50)
     print("  PIPELINE COMPLETE!")

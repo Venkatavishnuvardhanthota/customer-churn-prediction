@@ -153,6 +153,7 @@ def evaluate_model(model, X_test, y_test,
         'recall':           recall,
         'f1':               f1,
         'auc':              auc,
+        'y_true':           y_test,
         'predictions':      predictions,
         'probabilities':    churn_proba,
         'confusion_matrix': cm
@@ -306,11 +307,12 @@ def plot_roc_curve(models_results,
 
     for i, result in enumerate(models_results):
 
+        probs = result['probabilities']
+        if probs.ndim == 2:
+            probs = probs[:, 1]
         fpr, tpr, _ = roc_curve(
-
-            result['confusion_matrix'].ravel(),
-
-            result['probabilities']
+            result['y_true'],
+            probs
         )
 
         auc = result['auc']
@@ -664,7 +666,7 @@ def full_evaluation_report(models_dict,
         key=lambda name: all_results[name]['auc']
     )
 
-    print(f"\n🏆 BEST MODEL: {best_model_name}")
+    print(f"\n🏆 BEST MODEL (test set, informational only): {best_model_name}")
     print(f"   AUC: {all_results[best_model_name]['auc']:.4f}")
 
     return all_results, best_model_name

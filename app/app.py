@@ -114,7 +114,7 @@ with col1:
     st.subheader("📋 Account Information")
 
     tenure = st.slider('Tenure (months)',
-                       min_value = 0, 
+                       min_value = 1, 
                        max_value = 72,
                        value = 12,
                        help="How many months has this customer been with the company?")
@@ -262,65 +262,12 @@ if predict_button:
         'TotalCharges': total_charges
     }
 
-    input_df = pd.DataFrame([input_data])
+    # Shared feature engineering & encoding (src/features.py)
+    TRAINING_MEDIAN_CHARGES = models['model_info']['high_value_threshold']
+    from src.features import add_engineered_features, encode_for_inference
 
-    # Feature 1: tenure_group
-    def get_tenure_group(t):
-        if t <= 12:
-            return 'New'
-        elif t <= 36:
-            return 'Mid'
-        else:
-            return 'Loyal'
-
-    input_df['tenure_group'] = input_df['tenure'].apply(
-        get_tenure_group
-    )
-
-    # Feature 2: total_services
-    service_cols = [
-        'PhoneService', 'MultipleLines',
-        'OnlineSecurity', 'OnlineBackup',
-        'DeviceProtection', 'TechSupport',
-        'StreamingTV', 'StreamingMovies'
-    ]
-    input_df['total_services'] = (
-        input_df[service_cols] == 'Yes'
-    ).sum(axis=1)
-
-    # Feature 3: is_new_customer
-    input_df['is_new_customer'] = (
-        input_df['tenure'] <= 12
-    ).astype(int)
-
-    # Feature 4: avg_monthly_from_total
-    input_df['avg_monthly_from_total'] = (
-        input_df['TotalCharges'] /
-        input_df['tenure'].replace(0, 1)
-    )
-
-    # Feature 5: high_value_customer
-    TRAINING_MEDIAN_CHARGES = 70.35
-    input_df['high_value_customer'] = (
-        input_df['MonthlyCharges'] >
-        TRAINING_MEDIAN_CHARGES
-    ).astype(int)
-
-    # One-Hot Encode
-    categorical_cols = input_df.select_dtypes(include = ['object', 'category']).columns.tolist()
-
-    input_encoded = pd.get_dummies(
-        input_df,
-        columns=categorical_cols,
-        drop_first=True
-    )
-
-    feature_columns = models['feature_columns']
-    for col in feature_columns:
-        if col not in input_encoded.columns:
-            input_encoded[col] = 0
-
-    input_encoded = input_encoded[feature_columns]
+    input_df = add_engineered_features(pd.DataFrame([input_data]), TRAINING_MEDIAN_CHARGES)
+    input_encoded = encode_for_inference(input_df, models['feature_columns'])
 
     # Scale Features
     scaler = models['scaler']
@@ -362,7 +309,7 @@ if predict_button:
         st.metric("Risk Level", risk_level)
 
 
-    if prediction == 1:
+    if churn_probability > 0.7:
         st.error(f"""
         ## 🚨 HIGH CHURN RISK DETECTED!
 
@@ -375,7 +322,18 @@ if predict_button:
         - 📋 Suggest switching to annual contract
         - 🎁 Provide exclusive retention offer
         """)
+    elif churn_probability > 0.4:
+        st.warning(f"""
+        ## ⚠️ MEDIUM CHURN RISK
 
+        This customer has a **{churn_probability:.1%}**
+        probability of leaving (model binary decision at 50% threshold: **{'Churn' if prediction == 1 else 'Stay'}**).
+
+        ### Recommended Actions:
+        - 👀 Monitor account activity and satisfaction
+        - 📧 Send a proactive check-in or survey
+        - 💡 Highlight value of unused add-on services or longer contracts
+        """)
     else:
         # Customer likely to stay!
         st.success(f"""
@@ -437,7 +395,7 @@ if predict_button:
         st.write(f"**Customer Type:** "
                  f"{'New' if tenure <= 12 else 'Existing'}")
         st.write(f"**High Value:** "
-                 f"{'Yes' if monthly_charges > 70.35 else 'No'}")
+                 f"{'Yes' if monthly_charges > TRAINING_MEDIAN_CHARGES else 'No'}")
         st.write(f"**Senior Citizen:** {senior_citizen}")
 
         
